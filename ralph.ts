@@ -10,7 +10,7 @@ import { $ } from "bun";
 import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync } from "fs";
 import { join } from "path";
 
-const VERSION = "1.0.5";
+const VERSION = "1.0.6";
 
 // Parse arguments
 const args = process.argv.slice(2);
@@ -52,7 +52,7 @@ How it works:
   5. AI sees its previous work in files
   6. Continues until promise detected or max iterations
 
-To stop manually: Ctrl+C or run /cancel-ralph in OpenCode
+To stop manually: Ctrl+C
 
 Learn more: https://ghuntley.com/ralph/
 `);
@@ -645,24 +645,7 @@ async function runRalphLoop(): Promise<void> {
 
       if (detectPlaceholderPluginError(combinedOutput)) {
         console.error(
-          "\n❌ OpenCode tried to load the npm plugin 'ralph-wiggum', which is a placeholder package.",
-        );
-        console.error(
-          "Remove 'ralph-wiggum' from your opencode.json plugin list, or re-run with --no-plugins.",
-        );
-        clearState();
-        process.exit(1);
-      }
-
-      if (exitCode !== 0) {
-        console.error(`\n❌ OpenCode exited with code ${exitCode}. Stopping the loop.`);
-        clearState();
-        process.exit(exitCode);
-      }
-
-      if (detectPlaceholderPluginError(stderr) || detectPlaceholderPluginError(result)) {
-        console.error(
-          "\n❌ OpenCode tried to load the npm plugin 'ralph-wiggum', which is a placeholder package.",
+          "\n❌ OpenCode tried to load the legacy 'ralph-wiggum' plugin. This package is CLI-only.",
         );
         console.error(
           "Remove 'ralph-wiggum' from your opencode.json plugin list, or re-run with --no-plugins.",

@@ -223,38 +223,3 @@ describe("Ralph Wiggum CLI Arguments", () => {
     expect(promptParts.join(" ")).toBe("Test task");
   });
 });
-
-describe("OpenCode Command Files", () => {
-  const commandDir = join(import.meta.dir, "..", ".opencode", "command");
-
-  test("ralph-loop.md should exist and have correct frontmatter", () => {
-    const filePath = join(commandDir, "ralph-loop.md");
-    expect(existsSync(filePath)).toBe(true);
-
-    const content = readFileSync(filePath, "utf-8");
-    expect(content).toContain("---");
-    expect(content).toContain("description:");
-    expect(content).toContain("$ARGUMENTS");
-    expect(content).toContain("<promise>COMPLETE</promise>");
-  });
-
-  test("cancel-ralph.md should exist", () => {
-    const filePath = join(commandDir, "cancel-ralph.md");
-    expect(existsSync(filePath)).toBe(true);
-
-    const content = readFileSync(filePath, "utf-8");
-    expect(content).toContain("---");
-    expect(content).toContain("Cancel");
-    expect(content).toContain("ralph-loop.state.json");
-  });
-
-  test("help.md should exist and explain Ralph Wiggum", () => {
-    const filePath = join(commandDir, "help.md");
-    expect(existsSync(filePath)).toBe(true);
-
-    const content = readFileSync(filePath, "utf-8");
-    expect(content).toContain("Ralph Wiggum");
-    expect(content).toContain("Geoffrey Huntley");
-    expect(content).toContain("ghuntley.com/ralph");
-  });
-});

@@ -17,7 +17,6 @@
   <a href="#what-is-ralph">What is Ralph?</a> •
   <a href="#installation">Installation</a> •
   <a href="#quick-start">Quick Start</a> •
-  <a href="#which-approach">Which Approach?</a> •
   <a href="#commands">Commands</a>
 </p>
 
@@ -26,6 +25,8 @@
 ## What is Ralph?
 
 Ralph is a development methodology where an AI agent receives the **same prompt repeatedly** until it completes a task. Each iteration, the AI sees its previous work in files and git history, enabling self-correction and incremental progress.
+
+This package provides a **CLI-only** implementation (no OpenCode plugin).
 
 ```bash
 # The essence of Ralph:
@@ -49,15 +50,25 @@ done
 
 **Prerequisites:** [Bun](https://bun.sh) and [OpenCode](https://opencode.ai)
 
-### macOS / Linux
+### npm (recommended)
+
+```bash
+npm install -g @th0rgal/ralph-wiggum
+```
+
+### Bun
+
+```bash
+bun add -g @th0rgal/ralph-wiggum
+```
+
+### From source
 
 ```bash
 git clone https://github.com/Th0rgal/ralph-wiggum
 cd opencode-ralph-wiggum
 ./install.sh
 ```
-
-### Windows (PowerShell)
 
 ```powershell
 git clone https://github.com/Th0rgal/ralph-wiggum
@@ -67,8 +78,6 @@ cd opencode-ralph-wiggum
 
 This installs:
 - `ralph` CLI command (global)
-- OpenCode commands (`/ralph-loop`, `/cancel-ralph`, `/help`)
-- OpenCode plugin with custom tools
 
 ## Quick Start
 
@@ -82,54 +91,6 @@ ralph "Build a REST API for todos with CRUD operations and tests. \
   Run tests after each change. Output <promise>COMPLETE</promise> when all tests pass." \
   --max-iterations 20
 ```
-
-## Which Approach?
-
-This implementation provides **two ways** to run Ralph loops:
-
-### CLI Loop (Recommended)
-
-External loop that calls `opencode run` repeatedly.
-
-```bash
-ralph "Your task" --max-iterations 10
-```
-
-| Pros | Cons |
-|------|------|
-| ✅ Works with any OpenCode version | ❌ Each iteration is a fresh session |
-| ✅ Simple and predictable | ❌ No conversation context between iterations |
-| ✅ Easy to debug | |
-| ✅ Auto-commit between iterations | |
-
-**Best for:** Most use cases, especially tasks with clear success criteria.
-
-### Plugin Loop (Experimental)
-
-In-session continuation using OpenCode's SDK events.
-
-```bash
-# In OpenCode TUI, use the ralph_start tool:
-# "Start a Ralph loop to build X"
-```
-
-| Pros | Cons |
-|------|------|
-| ✅ Single session context | ❌ Depends on OpenCode plugin API |
-| ✅ More efficient | ❌ Experimental—API may change |
-| ✅ Tools available in-session | ❌ Harder to debug |
-
-**Best for:** Long-running tasks where conversation context matters.
-
-### Decision Guide
-
-| If you need... | Use |
-|---------------|-----|
-| Reliability | CLI Loop |
-| Auto-commits | CLI Loop |
-| Conversation context | Plugin Loop |
-| Scripting/automation | CLI Loop |
-| First time trying Ralph | CLI Loop |
 
 ## Commands
 
@@ -150,43 +111,20 @@ Options:
   --help                   Show help
 ```
 
-### OpenCode Commands
-
-```bash
-/ralph-loop <prompt>       # Start a loop with the given task
-/cancel-ralph              # Cancel the active loop
-/help                      # Show Ralph Wiggum documentation
-```
-
-### Plugin Tools
-
-When the plugin is active, these tools are available in OpenCode:
-
-| Tool | Description |
-|------|-------------|
-| `ralph_start` | Start a loop with prompt, max iterations, completion promise |
-| `ralph_status` | Check current loop status and iteration |
-| `ralph_cancel` | Cancel the active loop |
-
 ## Troubleshooting
 
-### "ralph-wiggum is not yet ready for use. This is a placeholder package."
+### "ralph-wiggum" plugin errors
 
-OpenCode is trying to load the npm package `ralph-wiggum`, which is a placeholder.
-Remove `ralph-wiggum` from your OpenCode `plugin` list (opencode.json), or run:
-
-```bash
-ralph "Your task" --no-plugins
-```
-
-### "Cannot find module '@opencode-ai/plugin'"
-
-OpenCode is loading the `@th0rgal/ralph-wiggum` npm package, but its dependencies aren't installed.
-Reinstall/upgrade the package so dependencies are present, or temporarily disable non-auth plugins:
+This package is **CLI-only**. If OpenCode tries to load a `ralph-wiggum` plugin,
+remove it from your OpenCode `plugin` list (opencode.json), or run:
 
 ```bash
 ralph "Your task" --no-plugins
 ```
+
+### "bun: command not found"
+
+Install Bun: https://bun.sh
 
 ## Writing Good Prompts
 
@@ -280,34 +218,27 @@ ralph "Your task" --max-iterations 20
 
 ```
 ralph-wiggum/
+├── bin/ralph.js                  # CLI entrypoint
 ├── ralph.ts                      # CLI loop script
 ├── package.json                  # Package config
 ├── install.sh                    # Installation script
-├── uninstall.sh                  # Uninstallation script
-└── .opencode/
-    ├── command/
-    │   ├── ralph-loop.md         # /ralph-loop command
-    │   ├── cancel-ralph.md       # /cancel-ralph command
-    │   └── help.md               # /help command
-    └── plugin/
-        └── ralph-wiggum.ts       # OpenCode plugin
+└── uninstall.sh                  # Uninstallation script
 ```
 
 ## Uninstall
 
 ```bash
-./uninstall.sh
+npm uninstall -g @th0rgal/ralph-wiggum
 ```
 
 ```powershell
-.\uninstall.ps1
+npm uninstall -g @th0rgal/ralph-wiggum
 ```
 
 ## Learn More
 
 - [Original technique by Geoffrey Huntley](https://ghuntley.com/ralph/)
 - [Ralph Orchestrator](https://github.com/mikeyobrien/ralph-orchestrator)
-- [Claude Code Plugin](https://github.com/anthropics/claude-code/tree/main/plugins/ralph-wiggum)
 
 ## License
 

@@ -1,26 +1,19 @@
 #!/bin/bash
-# Uninstall script for OpenCode Ralph Wiggum
+# Uninstall script for Ralph Wiggum CLI
 
 set -e
 
-echo "Uninstalling OpenCode Ralph Wiggum..."
+echo "Uninstalling Ralph Wiggum CLI..."
 
-# Determine OpenCode config directory (XDG-compatible)
-OPENCODE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
+if command -v bun &> /dev/null; then
+  echo "Unlinking ralph command (bun)..."
+  bun unlink @th0rgal/ralph-wiggum 2>/dev/null || true
+fi
 
-# Remove OpenCode commands
-echo "Removing OpenCode commands..."
-rm -f "$OPENCODE_CONFIG_DIR/command/ralph-loop.md"
-rm -f "$OPENCODE_CONFIG_DIR/command/cancel-ralph.md"
-rm -f "$OPENCODE_CONFIG_DIR/command/help.md"
-
-# Remove OpenCode plugin
-echo "Removing OpenCode plugin..."
-rm -f "$OPENCODE_CONFIG_DIR/plugin/ralph-wiggum.ts"
-
-# Unlink the package
-echo "Unlinking ralph command..."
-bun unlink @th0rgal/ralph-wiggum 2>/dev/null || true
+if command -v npm &> /dev/null; then
+  echo "Removing global package (npm)..."
+  npm uninstall -g @th0rgal/ralph-wiggum 2>/dev/null || true
+fi
 
 echo ""
 echo "Uninstall complete!"

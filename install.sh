@@ -1,9 +1,9 @@
 #!/bin/bash
-# Install script for OpenCode Ralph Wiggum
+# Install script for Ralph Wiggum CLI
 
 set -e
 
-echo "Installing OpenCode Ralph Wiggum..."
+echo "Installing Ralph Wiggum CLI..."
 
 # Check for Bun
 if ! command -v bun &> /dev/null; then
@@ -31,40 +31,13 @@ bun install
 echo "Linking ralph command..."
 bun link
 
-# Determine OpenCode config directory (XDG-compatible)
-OPENCODE_CONFIG_DIR="${XDG_CONFIG_HOME:-$HOME/.config}/opencode"
-
-# Install OpenCode commands globally
-echo "Installing OpenCode commands..."
-mkdir -p "$OPENCODE_CONFIG_DIR/command"
-cp "$SCRIPT_DIR/.opencode/command/"*.md "$OPENCODE_CONFIG_DIR/command/"
-
-# Install OpenCode plugin globally
-echo "Installing OpenCode plugin..."
-mkdir -p "$OPENCODE_CONFIG_DIR/plugin"
-cp "$SCRIPT_DIR/.opencode/plugin/"*.ts "$OPENCODE_CONFIG_DIR/plugin/"
-
 echo ""
 echo "Installation complete!"
 echo ""
 echo "Usage:"
 echo ""
-echo "  CLI Loop (external):"
+echo "  CLI Loop:"
 echo "    ralph \"Your task\" --max-iterations 10"
 echo "    ralph --help"
-echo ""
-echo "  Plugin Loop (in-session):"
-echo "    In OpenCode, use the ralph_start tool"
-echo "    Or use /ralph-loop command"
-echo ""
-echo "OpenCode commands installed:"
-echo "  /ralph-loop - Start a Ralph loop"
-echo "  /cancel-ralph - Cancel active loop"
-echo "  /help - Show help"
-echo ""
-echo "Plugin tools available:"
-echo "  ralph_start - Start a loop in-session"
-echo "  ralph_status - Check loop status"
-echo "  ralph_cancel - Cancel the loop"
 echo ""
 echo "Learn more: https://ghuntley.com/ralph/"
