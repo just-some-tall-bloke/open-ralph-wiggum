@@ -75,15 +75,17 @@ const PARSE_PATTERNS: Record<string, (line: string) => string | null> = {
     }
     return null;
   },
-  "codex": (line) => {
-    const match = stripAnsi(line).match(/(?:Tool:|Using|Calling|Running)\s+([A-Za-z0-9_-]+)/i);
-    return match ? match[1] : null;
-  },
-  "copilot": (line) => {
-    const match = stripAnsi(line).match(/(?:Tool:|Using|Called|Running)\s+([A-Za-z0-9_-]+)/i);
-    return match ? match[1] : null;
-  },
+  "codex": null,
+  "copilot": null,
 };
+
+const defaultParseToolOutput = (line: string): string | null => {
+  const match = stripAnsi(line).match(/(?:Tool:|Using|Calling|Running)\s+([A-Za-z0-9_-]+)/i);
+  return match ? match[1] : null;
+};
+
+PARSE_PATTERNS["codex"] = defaultParseToolOutput;
+PARSE_PATTERNS["copilot"] = defaultParseToolOutput;
 
 const ARGS_TEMPLATES: Record<string, (prompt: string, model: string, options?: AgentBuildArgsOptions) => string[]> = {
   "opencode": (prompt, model, options) => {
