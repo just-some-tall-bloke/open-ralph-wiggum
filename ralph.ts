@@ -83,6 +83,10 @@ const PARSE_PATTERNS: Record<string, (line: string) => string | null> = {
     const match = stripAnsi(line).match(/(?:Tool:|Using|Called|Running)\s+([A-Za-z0-9_-]+)/i);
     return match ? match[1] : null;
   },
+  "default": (line) => {
+    const match = stripAnsi(line).match(/(?:Tool:|Using|Called|Running)\s+([A-Za-z0-9_-]+)/i);
+    return match ? match[1] : null;
+  },
 };
 
 const ARGS_TEMPLATES: Record<string, (prompt: string, model: string, options?: AgentBuildArgsOptions) => string[]> = {
@@ -114,6 +118,14 @@ const ARGS_TEMPLATES: Record<string, (prompt: string, model: string, options?: A
     if (model) cmdArgs.push("--model", model);
     if (options?.allowAllPermissions) cmdArgs.push("--allow-all", "--no-ask-user");
     if (options?.extraFlags?.length) cmdArgs.push(...options.extraFlags);
+    return cmdArgs;
+  },
+  "default": (prompt, model, options) => {
+    const cmdArgs: string[] = [];
+    if (model) cmdArgs.push("--model", model);
+    if (options?.allowAllPermissions) cmdArgs.push("--full-auto");
+    if (options?.extraFlags?.length) cmdArgs.push(...options.extraFlags);
+    cmdArgs.push(prompt);
     return cmdArgs;
   },
 };
@@ -158,7 +170,7 @@ function createAgentConfig(json: JsonAgentConfig): AgentConfig {
     command: resolveCommand(json.command, process.env[`RALPH_${json.type.toUpperCase()}_BINARY`]),
     buildArgs: ARGS_TEMPLATES[argsTemplate] || ARGS_TEMPLATES["default"],
     buildEnv: ENV_TEMPLATES[envTemplate] || ENV_TEMPLATES["default"],
-    parseToolOutput: PARSE_PATTERNS[parsePattern] || PARSE_PATTERNS["codex"],
+    parseToolOutput: PARSE_PATTERNS[parsePattern] || PARSE_PATTERNS["default"],
     configName: json.configName,
   };
 }
@@ -200,110 +212,33 @@ const BUILT_IN_AGENTS: Record<AgentType, AgentConfig> = {
   opencode: {
     type: "opencode",
     command: resolveCommand("opencode", process.env.RALPH_OPENCODE_BINARY),
-    buildArgs: (promptText, modelName, options) => {
-      const cmdArgs = ["run"];
-      if (modelName) {
-        cmdArgs.push("-m", modelName);
-      }
-      if (options?.extraFlags && options.extraFlags.length > 0) {
-        cmdArgs.push(...options.extraFlags);
-      }
-      cmdArgs.push(promptText);
-      return cmdArgs;
-    },
-    buildEnv: options => {
-      const env = { ...process.env };
-      if (options.filterPlugins || options.allowAllPermissions) {
-        env.OPENCODE_CONFIG = ensureRalphConfig({
-          filterPlugins: options.filterPlugins,
-          allowAllPermissions: options.allowAllPermissions,
-        });
-      }
-      return env;
-    },
-    parseToolOutput: line => {
-      const match = stripAnsi(line).match(/^\|\s{2}([A-Za-z0-9_-]+)/);
-      return match ? match[1] : null;
-    },
+    buildArgs: ARGS_TEMPLATES["opencode"],
+    buildEnv: ENV_TEMPLATES["opencode"],
+    parseToolOutput: PARSE_PATTERNS["opencode"],
     configName: "OpenCode",
   },
   "claude-code": {
     type: "claude-code",
     command: resolveCommand("claude", process.env.RALPH_CLAUDE_BINARY),
-    buildArgs: (promptText, modelName, options) => {
-      const cmdArgs = ["-p", promptText];
-      if (options?.streamOutput) {
-        cmdArgs.push("--output-format", "stream-json", "--include-partial-messages", "--verbose");
-      }
-      if (modelName) {
-        cmdArgs.push("--model", modelName);
-      }
-      if (options?.allowAllPermissions) {
-        cmdArgs.push("--dangerously-skip-permissions");
-      }
-      if (options?.extraFlags && options.extraFlags.length > 0) {
-        cmdArgs.push(...options.extraFlags);
-      }
-      return cmdArgs;
-    },
-    buildEnv: () => ({ ...process.env }),
-    parseToolOutput: line => {
-      const cleanLine = stripAnsi(line);
-      const match = cleanLine.match(/(?:Using|Called|Tool:)\s+([A-Za-z0-9_.-]+)/i);
-      if (match) return match[1];
-      if (/"type"\s*:\s*"tool_use"/.test(cleanLine)) {
-        const nameMatch = cleanLine.match(/"name"\s*:\s*"([^"]+)"/);
-        if (nameMatch) return nameMatch[1];
-      }
-      return null;
-    },
+    buildArgs: ARGS_TEMPLATES["claude-code"],
+    buildEnv: ENV_TEMPLATES["default"],
+    parseToolOutput: PARSE_PATTERNS["claude-code"],
     configName: "Claude Code",
   },
   "codex": {
     type: "codex",
     command: resolveCommand("codex", process.env.RALPH_CODEX_BINARY),
-    buildArgs: (promptText, modelName, options) => {
-      const cmdArgs = ["exec"];
-      if (modelName) {
-        cmdArgs.push("--model", modelName);
-      }
-      if (options?.allowAllPermissions) {
-        cmdArgs.push("--full-auto");
-      }
-      if (options?.extraFlags && options.extraFlags.length > 0) {
-        cmdArgs.push(...options.extraFlags);
-      }
-      cmdArgs.push(promptText);
-      return cmdArgs;
-    },
-    buildEnv: () => ({ ...process.env }),
-    parseToolOutput: line => {
-      const match = stripAnsi(line).match(/(?:Tool:|Using|Calling|Running)\s+([A-Za-z0-9_-]+)/i);
-      return match ? match[1] : null;
-    },
+    buildArgs: ARGS_TEMPLATES["codex"],
+    buildEnv: ENV_TEMPLATES["default"],
+    parseToolOutput: PARSE_PATTERNS["codex"],
     configName: "Codex",
   },
   "copilot": {
     type: "copilot",
     command: resolveCommand("copilot", process.env.RALPH_COPILOT_BINARY),
-    buildArgs: (promptText, modelName, options) => {
-      const cmdArgs = ["-p", promptText];
-      if (modelName) {
-        cmdArgs.push("--model", modelName);
-      }
-      if (options?.allowAllPermissions) {
-        cmdArgs.push("--allow-all", "--no-ask-user");
-      }
-      if (options?.extraFlags && options.extraFlags.length > 0) {
-        cmdArgs.push(...options.extraFlags);
-      }
-      return cmdArgs;
-    },
-    buildEnv: () => ({ ...process.env }),
-    parseToolOutput: line => {
-      const match = stripAnsi(line).match(/(?:Tool:|Using|Called|Running)\s+([A-Za-z0-9_-]+)/i);
-      return match ? match[1] : null;
-    },
+    buildArgs: ARGS_TEMPLATES["copilot"],
+    buildEnv: ENV_TEMPLATES["default"],
+    parseToolOutput: PARSE_PATTERNS["copilot"],
     configName: "Copilot CLI",
   },
 };
