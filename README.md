@@ -209,10 +209,14 @@ Options:
   --prompt-template PATH   Use custom prompt template (see Custom Prompts)
   --no-stream              Buffer agent output and print at the end
   --verbose-tools          Print every tool line (disable compact tool summary)
+  --questions              Enable interactive question handling (default: enabled)
+  --no-questions           Disable interactive question handling (agent will loop on questions)
   --no-plugins             Disable non-auth OpenCode plugins for this run (opencode only)
   --no-commit              Don't auto-commit after iterations
   --allow-all              Auto-approve all tool permissions (default: on)
   --no-allow-all           Require interactive permission prompts
+  --config PATH            Use custom agent config file
+  --init-config [PATH]     Write default agent config to PATH and exit
   --help                   Show help
 ```
 
@@ -611,6 +615,7 @@ During operation, Ralph stores state in `.ralph/`:
 - `ralph-history.json` - Iteration history and metrics
 - `ralph-context.md` - Pending context for next iteration
 - `ralph-tasks.md` - Task list for Tasks Mode (created when `--tasks` is used)
+- `ralph-questions.json` - Pending user answers to agent questions
 
 ## Uninstall
 
