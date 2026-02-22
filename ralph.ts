@@ -385,23 +385,21 @@ interface RalphHistory {
   };
 }
 
+const EMPTY_HISTORY: RalphHistory = {
+  iterations: [],
+  totalDurationMs: 0,
+  struggleIndicators: { repeatedErrors: {}, noProgressIterations: 0, shortIterations: 0 }
+};
+
 // Load history
 function loadHistory(): RalphHistory {
   if (!existsSync(historyPath)) {
-    return {
-      iterations: [],
-      totalDurationMs: 0,
-      struggleIndicators: { repeatedErrors: {}, noProgressIterations: 0, shortIterations: 0 }
-    };
+    return EMPTY_HISTORY;
   }
   try {
     return JSON.parse(readFileSync(historyPath, "utf-8"));
   } catch {
-    return {
-      iterations: [],
-      totalDurationMs: 0,
-      struggleIndicators: { repeatedErrors: {}, noProgressIterations: 0, shortIterations: 0 }
-    };
+    return EMPTY_HISTORY;
   }
 }
 
