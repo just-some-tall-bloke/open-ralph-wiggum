@@ -9,7 +9,7 @@
 import { $ } from "bun";
 import { existsSync, readFileSync, writeFileSync, mkdirSync, statSync } from "fs";
 import { join } from "path";
-import { checkTerminalPromise, tasksMarkdownAllComplete } from "./completion";
+import { checkTerminalPromise, stripAnsi, tasksMarkdownAllComplete } from "./completion";
 
 const VERSION = "1.2.1";
 
@@ -1544,10 +1544,6 @@ function detectModelNotFoundError(output: string): boolean {
          output.includes("Provider returned error") ||
          output.includes("model not found") ||
          output.includes("No model configured");
-}
-
-function stripAnsi(input: string): string {
-  return input.replace(/\x1B\[[0-9;]*m/g, "");
 }
 
 function extractClaudeStreamDisplayLines(rawLine: string): string[] {
